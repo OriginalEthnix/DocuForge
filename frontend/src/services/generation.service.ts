@@ -1,0 +1,147 @@
+import api from './api';
+
+export const generationService = {
+  // Requirements
+  async generateRequirements(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/requirements/generate`);
+    return res.data;
+  },
+  async getRequirements(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/requirements`);
+    return res.data;
+  },
+
+  // User Stories
+  async generateUserStories(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/user-stories/generate`);
+    return res.data;
+  },
+  async getUserStories(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/user-stories`);
+    return res.data;
+  },
+
+  // SRS
+  async generateSRS(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/srs/generate`);
+    return res.data;
+  },
+  async getSRS(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/srs`);
+    return res.data;
+  },
+
+  // UML Diagrams
+  async generateUML(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/diagrams/uml/generate`);
+    return res.data;
+  },
+  async generateDFD(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/diagrams/dfd/generate`);
+    return res.data;
+  },
+  async getDiagrams(projectId: number, category?: string) {
+    const params = category ? { category } : {};
+    const res = await api.get(`/projects/${projectId}/diagrams`, { params });
+    return res.data;
+  },
+
+  // Database Design
+  async generateDatabase(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/database/generate`);
+    return res.data;
+  },
+  async getDatabase(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/database`);
+    return res.data;
+  },
+
+  // Planning
+  async generatePlanning(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/planning/generate`);
+    return res.data;
+  },
+  async getPlanning(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/planning`);
+    return res.data;
+  },
+
+  // Estimation
+  async generateEstimation(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/estimation/generate`);
+    return res.data;
+  },
+  async getEstimation(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/estimation`);
+    return res.data;
+  },
+
+  // Risks
+  async generateRisks(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/risks/generate`);
+    return res.data;
+  },
+  async getRisks(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/risks`);
+    return res.data;
+  },
+
+  // Test Cases
+  async generateTestCases(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/tests/generate`);
+    return res.data;
+  },
+  async getTestCases(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/tests`);
+    return res.data;
+  },
+
+  // Traceability
+  async generateTraceability(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/traceability/generate`);
+    return res.data;
+  },
+  async getTraceability(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/traceability`);
+    return res.data;
+  },
+
+  // Metrics
+  async generateMetrics(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/metrics/generate`);
+    return res.data;
+  },
+  async getMetrics(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/metrics`);
+    return res.data;
+  },
+
+  // Maintenance
+  async generateMaintenance(projectId: number) {
+    const res = await api.post(`/projects/${projectId}/maintenance/generate`);
+    return res.data;
+  },
+  async getMaintenance(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/maintenance`);
+    return res.data;
+  },
+
+  // PDF Export
+  async exportPDF(projectId: number): Promise<Blob> {
+    const res = await api.get(`/projects/${projectId}/export/pdf`, {
+      responseType: 'blob',
+    });
+    return res.data;
+  },
+};
+
+export function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
