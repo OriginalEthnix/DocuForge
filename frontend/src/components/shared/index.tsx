@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Download, Loader2, AlertCircle, CheckCircle2, Sparkles } from 'lucide-react';
-import { generationService, downloadBlob } from '@/services/generation.service';
+import { generationService, downloadFileFromUrl } from '@/services/generation.service';
 import { getErrorMessage } from '@/services/api';
 
 interface GenerateButtonProps {
@@ -320,10 +320,11 @@ export function ExportPDFButton({ projectId }: { projectId: number }) {
   const handleExport = async () => {
     setLoading(true);
     try {
-      const blob = await generationService.exportPDF(projectId);
-      downloadBlob(blob, `project_${projectId}_documentation.pdf`);
+      const result = await generationService.exportPDF(projectId);
+      downloadFileFromUrl(result.download_url, result.filename);
     } catch (err) {
       console.error('PDF export failed:', err);
+      alert('PDF export failed. Please try again.');
     } finally {
       setLoading(false);
     }

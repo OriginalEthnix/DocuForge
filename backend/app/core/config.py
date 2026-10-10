@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     # PlantUML
     PLANTUML_SERVER: str = "https://www.plantuml.com/plantuml"
 
+    # AWS S3
+    AWS_REGION: str = "ap-south-1"
+    S3_BUCKET_NAME: str = ""
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    S3_PRESIGNED_URL_EXPIRE_SECONDS: int = 900
+    MAX_UPLOAD_SIZE_MB: int = 20
+
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
     AI_RATE_LIMIT_PER_MINUTE: int = 10

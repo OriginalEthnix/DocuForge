@@ -13,18 +13,22 @@ import { projectService } from '@/services/project.service';
 import { ProjectCreate } from '@/types';
 import { getErrorMessage } from '@/services/api';
 
+
+
 const DOMAINS = [
-  { value: 'web', label: 'Web App', emoji: '🌐' },
-  { value: 'mobile', label: 'Mobile', emoji: '📱' },
-  { value: 'desktop', label: 'Desktop', emoji: '💻' },
-  { value: 'ai_ml', label: 'AI / ML', emoji: '🤖' },
-  { value: 'fintech', label: 'FinTech', emoji: '💰' },
+  { value: 'web', label: 'Web Development', emoji: '🌐' },
+  { value: 'mobile', label: 'Mobile Development', emoji: '📱' },
+  { value: 'desktop', label: 'Desktop Application', emoji: '💻' },
+  { value: 'embedded', label: 'Embedded Systems', emoji: '🔌' },
+  { value: 'ai_ml', label: 'AI / Machine Learning', emoji: '🤖' },
+  { value: 'fintech', label: 'FinTech', emoji: '💳' },
   { value: 'healthcare', label: 'Healthcare', emoji: '🏥' },
-  { value: 'ecommerce', label: 'E-Commerce', emoji: '🛒' },
+  { value: 'ecommerce', label: 'E-commerce', emoji: '🛒' },
   { value: 'education', label: 'Education', emoji: '📚' },
-  { value: 'embedded', label: 'Embedded', emoji: '⚙️' },
-  { value: 'other', label: 'Other', emoji: '🔧' },
+  { value: 'other', label: 'Other', emoji: '✨' },
 ];
+
+
 
 const TECH_SUGGESTIONS = [
   'React', 'Vue.js', 'Angular', 'Next.js', 'Svelte',
@@ -39,7 +43,20 @@ const schema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters'),
   problem_statement: z.string().optional(),
   objectives: z.string().optional(),
-  domain: z.string().min(1, 'Please select a domain'),
+  
+domain: z.enum([
+  'web',
+  'mobile',
+  'desktop',
+  'embedded',
+  'ai_ml',
+  'fintech',
+  'healthcare',
+  'ecommerce',
+  'education',
+  'other',
+]),
+
   target_users: z.string().optional(),
   team_size: z.coerce.number().min(1).max(1000),
   timeline_weeks: z.coerce.number().min(1).max(520),

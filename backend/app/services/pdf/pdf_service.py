@@ -98,8 +98,8 @@ def _build_styles():
     ))
 
     styles.add(ParagraphStyle(
-        "Code",
-        parent=styles["Code"],
+        "CustomCode",
+        parent=styles["Normal"],
         fontSize=8,
         textColor=colors.HexColor("#374151"),
         backColor=colors.HexColor("#F3F4F6"),

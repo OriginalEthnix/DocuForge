@@ -126,13 +126,64 @@ export const generationService = {
     return res.data;
   },
 
-  // PDF Export
-  async exportPDF(projectId: number): Promise<Blob> {
-    const res = await api.get(`/projects/${projectId}/export/pdf`, {
-      responseType: 'blob',
-    });
+// PDF Export
+  async exportPDF(projectId: number): Promise<{
+    message: string;
+    file_id: number;
+    filename: string;
+    download_url: string;
+    expires_in_seconds: number;
+  }> {
+    const res = await api.get(`/projects/${projectId}/export/pdf`);
     return res.data;
   },
+
+  // Upload a file to S3 through the authenticated backend
+  async uploadFile(projectId: number, file: File): Promise<{
+    id: number;
+    filename: string;
+    content_type: string;
+    size_bytes: number;
+    download_url: string;
+    expires_in_seconds: number;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await api.post(
+      `/projects/${projectId}/files`,
+      formData,
+      {
+        headers: { 'Content-Type': undefined },
+        timeout: 120000,
+      }
+    );
+
+    return res.data;
+  },
+
+  // Get a fresh S3 download link for a previously uploaded file
+  async getFileDownload(projectId: number, fileId: number): Promise<{
+    id: number;
+    filename: string;
+    download_url: string;
+    expires_in_seconds: number;
+  }> {
+    const res = await api.get(
+      `/projects/${projectId}/files/${fileId}/download`
+    );
+    return res.data;
+  },
+};
+
+export function downloadFileFromUrl(url: string, filename: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 };
 
 export function downloadBlob(blob: Blob, filename: string) {

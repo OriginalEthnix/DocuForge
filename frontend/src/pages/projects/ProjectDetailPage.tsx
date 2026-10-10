@@ -7,12 +7,15 @@ import {
   CheckCircle2, Circle, Sparkles, ExternalLink,
   FileText, BookOpen, Layers, GitBranch, Network,
   Database, Map, TrendingUp, Shield, TestTube,
-  Link2, BarChart3, Wrench,
+  Link2, BarChart3, Wrench, Upload, Loader2, AlertCircle, Paperclip,
 } from 'lucide-react';
 import { projectService } from '@/services/project.service';
 import { MODULE_LABELS, ALL_MODULES } from '@/types';
 import { StatusBadge, ProgressRing, ExportPDFButton, CardSkeleton } from '@/components/shared';
+import { generationService, downloadFileFromUrl } from '@/services/generation.service';
+import { getErrorMessage } from '@/services/api';
 import { formatDistanceToNow } from 'date-fns';
+
 
 const MODULE_ICONS: Record<string, any> = {
   requirements: FileText,
@@ -58,6 +61,51 @@ export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const id = parseInt(projectId || '0');
+
+  // ── File Upload State ────────────────────────────────────────────────────────
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const [uploading, setUploading] = React.useState(false);
+  const [uploadedFiles, setUploadedFiles] = React.useState<Array<{
+    id: number;
+    filename: string;
+    content_type: string;
+    size_bytes: number;
+    download_url: string;
+    expires_in_seconds: number;
+  }>>([]);
+  const [downloadingId, setDownloadingId] = React.useState<number | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset the input so the same file can be re-uploaded
+    e.target.value = '';
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const result = await generationService.uploadFile(id, file);
+      setUploadedFiles((prev) => [result, ...prev]);
+    } catch (err) {
+      setUploadError(getErrorMessage(err));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownload = async (fileId: number, filename: string) => {
+    setDownloadingId(fileId);
+    try {
+      const result = await generationService.getFileDownload(id, fileId);
+      downloadFileFromUrl(result.download_url, result.filename || filename);
+    } catch (err) {
+      setUploadError(getErrorMessage(err));
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  // ────────────────────────────────────────────────────────────────────────────
 
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', id],
@@ -259,6 +307,137 @@ export function ProjectDetailPage() {
             );
           })}
         </div>
+      </motion.div>
+
+      {/* ── File Upload Section ──────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        style={{
+          marginTop: '2rem',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 'var(--radius-xl)',
+          padding: '1.5rem',
+        }}
+      >
+        <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Paperclip size={16} /> Project Files
+        </h2>
+
+        {/* Upload trigger */}
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem',
+            padding: '0.75rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            border: '1px dashed var(--border-brand)',
+            background: uploading ? 'rgba(99,102,241,0.05)' : 'transparent',
+            cursor: uploading ? 'not-allowed' : 'pointer',
+            transition: 'all var(--transition-fast)',
+            fontSize: '0.875rem',
+            color: 'var(--color-brand-400)',
+            fontWeight: 500,
+            width: 'fit-content',
+          }}
+        >
+          {uploading ? (
+            <>
+              <Loader2 size={15} style={{ animation: 'spin 0.8s linear infinite' }} />
+              Uploading…
+            </>
+          ) : (
+            <>
+              <Upload size={15} />
+              Upload a file
+            </>
+          )}
+          <input
+            type="file"
+            style={{ display: 'none' }}
+            disabled={uploading}
+            onChange={handleFileUpload}
+          />
+        </label>
+
+        {/* Upload error */}
+        {uploadError && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.5rem',
+              marginTop: '0.75rem',
+              padding: '0.625rem 0.875rem',
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8rem',
+              color: '#f87171',
+            }}
+          >
+            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+            {uploadError}
+          </motion.div>
+        )}
+
+        {/* Uploaded file list */}
+        {uploadedFiles.length > 0 && (
+          <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {uploadedFiles.map((f) => (
+              <div
+                key={f.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.625rem 0.875rem',
+                  background: 'var(--bg-surface)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-default)',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minWidth: 0 }}>
+                  <FileText size={14} style={{ color: 'var(--color-brand-400)', flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.825rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {f.filename}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                      {f.content_type} · {(f.size_bytes / 1024).toFixed(1)} KB
+                    </div>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => handleDownload(f.id, f.filename)}
+                  disabled={downloadingId === f.id}
+                  style={{ flexShrink: 0 }}
+                >
+                  {downloadingId === f.id ? (
+                    <Loader2 size={13} style={{ animation: 'spin 0.8s linear infinite' }} />
+                  ) : (
+                    <Download size={13} />
+                  )}
+                  Download
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {uploadedFiles.length === 0 && !uploading && (
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+            No files uploaded yet. Upload design docs, specs, or any project assets.
+          </p>
+        )}
       </motion.div>
     </div>
   );

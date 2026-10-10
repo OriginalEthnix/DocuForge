@@ -354,7 +354,9 @@ export function TestCasesPage() {
   const { data, isLoading, refetch } = useQuery({ queryKey: ['tests', id], queryFn: () => generationService.getTestCases(id) });
   const allTests = data?.test_cases || [];
   const filtered = typeFilter === 'all' ? allTests : allTests.filter((t: any) => t.test_type === typeFilter);
-  const types = [...new Set(allTests.map((t: any) => t.test_type as string))];
+ const types: string[] = Array.from(
+  new Set<string>(allTests.map((t: any) => String(t.test_type)))
+);
 
   const TYPE_COLORS: Record<string, string> = { unit: '#818cf8', integration: '#38bdf8', system: '#4ade80', acceptance: '#fbbf24', regression: '#f472b6', boundary: '#fb923c' };
 

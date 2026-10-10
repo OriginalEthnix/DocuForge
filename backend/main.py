@@ -11,7 +11,8 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.utils.logger import logger
-from app.api import auth, projects, generation, export, dashboard
+from app.api import auth, projects, generation, export, dashboard, files
+
 
 # Create all tables
 Base.metadata.create_all(bind=engine)
@@ -47,7 +48,7 @@ app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(generation.router, prefix="/api/projects", tags=["AI Generation"])
 app.include_router(export.router, prefix="/api/projects", tags=["Export"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
-
+app.include_router(files.router, prefix="/api/projects", tags=["Files"])
 
 @app.on_event("startup")
 async def startup_event():
