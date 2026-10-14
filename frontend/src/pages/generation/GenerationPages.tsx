@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Layers, Database, Map, TrendingUp, Link2, BarChart3, Wrench } from 'lucide-react';
 import { generationService } from '@/services/generation.service';
-import { GenerateButton, SectionHeader, EmptyState, CardSkeleton } from '@/components/shared';
+import { GenerateButton, SectionHeader, EmptyState, CardSkeleton, DownloadArtifactButton } from '@/components/shared';
 import { Radar, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS, RadialLinearScale, PointElement, LineElement,
@@ -33,7 +33,12 @@ export function SRSPage() {
   return (
     <div className="page-container">
       <SectionHeader title="SRS Document" subtitle="IEEE 830 Software Requirements Specification" icon={<Layers size={20} />}
-        action={<GenerateButton projectId={id} module="srs" label="Generate SRS" onSuccess={() => { qc.invalidateQueries({ queryKey: ['srs', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`srs_project_${id}.json`} />
+            <GenerateButton projectId={id} module="srs" label={content ? "Regenerate SRS" : "Generate SRS"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['srs', id] }); refetch(); }} />
+          </div>
+        } />
       {isLoading ? <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>{[1,2,3].map(i => <CardSkeleton key={i} />)}</div>
         : !content ? <EmptyState icon={<Layers size={32} />} title="SRS not generated" description="Generate a complete IEEE 830 compliant Software Requirements Specification document." />
         : <SRSContent content={content} />}
@@ -144,7 +149,12 @@ function DiagramsPage({ category, module, title, subtitle, icon }: { category: s
   return (
     <div className="page-container">
       <SectionHeader title={title} subtitle={subtitle} icon={icon}
-        action={<GenerateButton projectId={id} module={module} label={`Generate ${title}`} onSuccess={() => { qc.invalidateQueries({ queryKey: ['diagrams', id, category] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`${category}_diagrams_project_${id}.json`} />
+            <GenerateButton projectId={id} module={module} label={diagrams.length > 0 ? `Regenerate ${title}` : `Generate ${title}`} onSuccess={() => { qc.invalidateQueries({ queryKey: ['diagrams', id, category] }); refetch(); }} />
+          </div>
+        } />
 
       {isLoading ? <CardSkeleton /> : diagrams.length === 0 ? (
         <EmptyState icon={icon} title={`No ${title} generated yet`} description={`Generate ${title} from your project description using AI and PlantUML.`} />
@@ -212,7 +222,12 @@ export function DatabasePage() {
   return (
     <div className="page-container">
       <SectionHeader title="Database Design" subtitle="Entities, relationships, ER diagram, and SQL schema" icon={<Database size={20} />}
-        action={<GenerateButton projectId={id} module="database" label="Generate DB Design" onSuccess={() => { qc.invalidateQueries({ queryKey: ['database', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`database_project_${id}.json`} />
+            <GenerateButton projectId={id} module="database" label={content ? "Regenerate DB Design" : "Generate DB Design"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['database', id] }); refetch(); }} />
+          </div>
+        } />
 
       {isLoading ? <CardSkeleton /> : !content ? (
         <EmptyState icon={<Database size={32} />} title="Database design not generated" description="Generate normalized database tables with relationships, ER diagram, and SQL schema." />
@@ -282,7 +297,12 @@ export function RiskPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Risk Management" subtitle={`${risks.length} risks identified and analyzed`} icon={<Shield size={20} />}
-        action={<GenerateButton projectId={id} module="risks" label="Generate Risk Register" onSuccess={() => { qc.invalidateQueries({ queryKey: ['risks', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`risks_project_${id}.json`} />
+            <GenerateButton projectId={id} module="risks" label={risks.length > 0 ? "Regenerate Risk Register" : "Generate Risk Register"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['risks', id] }); refetch(); }} />
+          </div>
+        } />
 
       {risks.length > 0 && (
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
@@ -363,7 +383,12 @@ export function TestCasesPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Test Cases" subtitle={`${allTests.length} test cases across ${types.length} types`} icon={<TestTube size={20} />}
-        action={<GenerateButton projectId={id} module="tests" label="Generate Test Cases" onSuccess={() => { qc.invalidateQueries({ queryKey: ['tests', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`test_cases_project_${id}.json`} />
+            <GenerateButton projectId={id} module="tests" label={allTests.length > 0 ? "Regenerate Test Cases" : "Generate Test Cases"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['tests', id] }); refetch(); }} />
+          </div>
+        } />
 
       {types.length > 0 && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
@@ -436,7 +461,12 @@ export function PlanningPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Project Planning" subtitle="Sprints, Gantt chart, PERT analysis, and release plan" icon={<Map size={20} />}
-        action={<GenerateButton projectId={id} module="planning" label="Generate Plan" onSuccess={() => { qc.invalidateQueries({ queryKey: ['planning', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`planning_project_${id}.json`} />
+            <GenerateButton projectId={id} module="planning" label={content ? "Regenerate Plan" : "Generate Plan"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['planning', id] }); refetch(); }} />
+          </div>
+        } />
 
       {content && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-default)', paddingBottom: '0.5rem' }}>
@@ -563,7 +593,12 @@ export function EstimationPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Software Estimation" subtitle="COCOMO, Function Point Analysis, Cost & Team estimation" icon={<TrendingUp size={20} />}
-        action={<GenerateButton projectId={id} module="estimation" label="Generate Estimates" onSuccess={() => { qc.invalidateQueries({ queryKey: ['estimation', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`estimation_project_${id}.json`} />
+            <GenerateButton projectId={id} module="estimation" label={content ? "Regenerate Estimates" : "Generate Estimates"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['estimation', id] }); refetch(); }} />
+          </div>
+        } />
 
       {content && (
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-default)', paddingBottom: '0.5rem' }}>
@@ -636,7 +671,12 @@ export function TraceabilityPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Traceability Matrix" subtitle="Requirements mapped through design, implementation, and testing" icon={<Link2 size={20} />}
-        action={<GenerateButton projectId={id} module="traceability" label="Generate RTM" onSuccess={() => { qc.invalidateQueries({ queryKey: ['traceability', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`traceability_project_${id}.json`} />
+            <GenerateButton projectId={id} module="traceability" label={matrix.length > 0 ? "Regenerate RTM" : "Generate RTM"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['traceability', id] }); refetch(); }} />
+          </div>
+        } />
 
       {matrix.length > 0 && (
         <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
@@ -716,7 +756,12 @@ export function MetricsPage() {
   return (
     <div className="page-container">
       <SectionHeader title="Quality Metrics Dashboard" subtitle="Software quality and productivity measurements" icon={<BarChart3 size={20} />}
-        action={<GenerateButton projectId={id} module="metrics" label="Generate Metrics" onSuccess={() => { qc.invalidateQueries({ queryKey: ['metrics', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`metrics_project_${id}.json`} />
+            <GenerateButton projectId={id} module="metrics" label={metrics && Object.keys(metrics).length > 0 ? "Regenerate Metrics" : "Generate Metrics"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['metrics', id] }); refetch(); }} />
+          </div>
+        } />
 
       {isLoading ? <CardSkeleton /> : !metrics || Object.keys(metrics).length === 0 ? (
         <EmptyState icon={<BarChart3 size={32} />} title="Quality metrics not generated" description="Generate quality metrics dashboard with cyclomatic complexity, defect density, coverage, and productivity charts." />
@@ -776,7 +821,12 @@ export function MaintenancePage() {
   return (
     <div className="page-container">
       <SectionHeader title="Maintenance Plan" subtitle="Post-deployment maintenance strategy and schedule" icon={<Wrench size={20} />}
-        action={<GenerateButton projectId={id} module="maintenance" label="Generate Maintenance Plan" onSuccess={() => { qc.invalidateQueries({ queryKey: ['maintenance', id] }); refetch(); }} />} />
+        action={
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`maintenance_project_${id}.json`} />
+            <GenerateButton projectId={id} module="maintenance" label={content ? "Regenerate Maintenance Plan" : "Generate Maintenance Plan"} onSuccess={() => { qc.invalidateQueries({ queryKey: ['maintenance', id] }); refetch(); }} />
+          </div>
+        } />
 
       {isLoading ? <CardSkeleton /> : !content ? (
         <EmptyState icon={<Wrench size={32} />} title="Maintenance plan not generated" description="Generate a comprehensive software maintenance plan covering corrective, adaptive, preventive, and perfective maintenance." />

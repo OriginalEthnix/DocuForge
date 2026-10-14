@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
     # AI
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-1.5-pro"
+    GEMINI_MODEL: str = "gemini-flash-latest"
 
     # PlantUML
     PLANTUML_SERVER: str = "https://www.plantuml.com/plantuml"

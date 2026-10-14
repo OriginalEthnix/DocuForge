@@ -174,6 +174,33 @@ export const generationService = {
     );
     return res.data;
   },
+
+  // Document Management & S3 Artifacts
+  async listDocuments(projectId: number) {
+    const res = await api.get(`/projects/${projectId}/documents`);
+    return res.data;
+  },
+  async getDocument(projectId: number, documentId: string) {
+    const res = await api.get(`/projects/${projectId}/documents/${documentId}`);
+    return res.data;
+  },
+  async updateDocument(projectId: number, documentId: string, content: any) {
+    const res = await api.put(`/projects/${projectId}/documents/${documentId}`, { content });
+    return res.data;
+  },
+  async regenerateDocument(projectId: number, documentId: string) {
+    const res = await api.post(`/projects/${projectId}/documents/${documentId}/regenerate`);
+    return res.data;
+  },
+  async downloadDocument(projectId: number, documentId: string): Promise<{
+    document_id: string;
+    filename: string;
+    download_url: string;
+    expires_in_seconds: number;
+  }> {
+    const res = await api.get(`/projects/${projectId}/documents/${documentId}/download`);
+    return res.data;
+  },
 };
 
 export function downloadFileFromUrl(url: string, filename: string) {

@@ -110,6 +110,20 @@ export function GenerateButton({
   );
 }
 
+export function DownloadArtifactButton({ downloadUrl, filename }: { downloadUrl?: string; filename?: string }) {
+  if (!downloadUrl) return null;
+  return (
+    <button
+      className="btn btn-secondary btn-sm"
+      onClick={() => downloadFileFromUrl(downloadUrl, filename || 'artifact.json')}
+      title="Download persistent S3 JSON artifact"
+    >
+      <Download size={14} />
+      <span>JSON Artifact</span>
+    </button>
+  );
+}
+
 // ─── Loading Skeleton ─────────────────────────────────────────────────────────
 
 interface SkeletonProps {

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react';
 import { generationService } from '@/services/generation.service';
-import { GenerateButton, SectionHeader, StatusBadge, EmptyState, CardSkeleton } from '@/components/shared';
+import { GenerateButton, SectionHeader, StatusBadge, EmptyState, CardSkeleton, DownloadArtifactButton } from '@/components/shared';
 
 const PRIORITY_COLORS: Record<string, string> = {
   high: '#f87171', medium: '#fbbf24', low: '#4ade80',
@@ -38,12 +38,15 @@ export function RequirementsPage() {
         subtitle="AI-generated IEEE 830 compliant requirements specification"
         icon={<FileText size={20} />}
         action={
-          <GenerateButton
-            projectId={id}
-            module="requirements"
-            label="Generate Requirements"
-            onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['requirements', id] }); refetch(); }}
-          />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`requirements_project_${id}.json`} />
+            <GenerateButton
+              projectId={id}
+              module="requirements"
+              label={hasData ? "Regenerate Requirements" : "Generate Requirements"}
+              onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['requirements', id] }); refetch(); }}
+            />
+          </div>
         }
       />
 

@@ -9,13 +9,15 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, run_migrations
 from app.utils.logger import logger
 from app.api import auth, projects, generation, export, dashboard, files
 
 
-# Create all tables
+# Create all tables and run safe column migrations
 Base.metadata.create_all(bind=engine)
+run_migrations(engine)
+
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)

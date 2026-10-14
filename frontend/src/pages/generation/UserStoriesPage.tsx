@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Star, Target, CheckSquare } from 'lucide-react';
 import { generationService } from '@/services/generation.service';
-import { GenerateButton, SectionHeader, EmptyState, CardSkeleton } from '@/components/shared';
+import { GenerateButton, SectionHeader, EmptyState, CardSkeleton, DownloadArtifactButton } from '@/components/shared';
 
 const PRIORITY_COLORS: Record<string, string> = {
   critical: '#f87171', high: '#fb923c', medium: '#fbbf24', low: '#4ade80',
@@ -57,10 +57,11 @@ export function UserStoriesPage() {
                 </button>
               ))}
             </div>
+            <DownloadArtifactButton downloadUrl={data?.download_url} filename={`user_stories_project_${id}.json`} />
             <GenerateButton
               projectId={id}
               module="user_stories"
-              label="Generate Stories"
+              label={stories.length > 0 ? "Regenerate Stories" : "Generate Stories"}
               onSuccess={() => { queryClient.invalidateQueries({ queryKey: ['user-stories', id] }); refetch(); }}
             />
           </div>

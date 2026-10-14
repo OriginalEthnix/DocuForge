@@ -125,12 +125,19 @@ class GeneratedDocument(Base):
     __tablename__ = "generated_documents"
 
     id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(String(64), nullable=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False, index=True)
-    doc_type = Column(String(100), nullable=False)  # srs, estimation, traceability, metrics, maintenance
+    doc_type = Column(String(100), nullable=False, index=True)  # requirements, user_stories, srs, uml, dfd, database, planning, estimation, risks, tests, traceability, metrics, maintenance
     content = Column(JSON, nullable=False)  # structured JSON content
+    s3_key = Column(String(1024), nullable=True, index=True)
+    content_type = Column(String(100), default="application/json")
+    file_size_bytes = Column(Integer, nullable=True)
     version = Column(Integer, default=1)
-    is_latest = Column(Boolean, default=True)
+    status = Column(String(50), default="completed")
+    is_latest = Column(Boolean, default=True, index=True)
+    meta = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     project = relationship("Project", back_populates="generated_docs")
+
