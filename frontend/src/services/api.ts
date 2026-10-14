@@ -67,7 +67,12 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Do NOT attempt token refresh or page reload for login/register endpoints
+    const isAuthEndpoint =
+      originalRequest?.url?.includes('/auth/login') ||
+      originalRequest?.url?.includes('/auth/register');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -129,6 +134,11 @@ export function getErrorMessage(error: unknown): string {
     // 1. Backend returned structured detail from FastAPI
     if (data?.detail) {
       if (typeof data.detail === 'string') return data.detail;
+      if (typeof data.detail === 'object' && data.detail !== null) {
+        if ('message' in data.detail && typeof (data.detail as any).message === 'string') {
+          return (data.detail as any).message;
+        }
+      }
       if (Array.isArray(data.detail)) {
         return data.detail.map((d: any) => d.msg || (typeof d === 'string' ? d : JSON.stringify(d))).join(', ');
       }

@@ -44,24 +44,46 @@ class TestAuthenticationEndpoints:
     """Test suite for all authentication flows."""
 
     def test_login_nonexistent_email(self, client):
-        """Nonexistent email must return 401 Unauthorized, never 404 or 500."""
+        """Nonexistent email returns 404 with friendly message for client signup redirect."""
         res = client.post("/api/auth/login", json={
             "email": "definitely_nonexistent_user_999@example.com",
             "password": "AnyPassword123!"
         })
-        assert res.status_code == 401
+        assert res.status_code == 404
         data = res.json()
-        assert "Invalid email or password." in data.get("detail", "")
+        assert "No account found with this email" in data.get("detail", "")
 
-    def test_login_incorrect_password(self, client):
+    def test_login_incorrect_password(self, client, db_session):
         """Existing email with wrong password must return 401 Unauthorized."""
-        res = client.post("/api/auth/login", json={
-            "email": "dhruvwadhwa8661@gmail.com",
-            "password": "WrongPassword999!"
-        })
-        assert res.status_code == 401
-        data = res.json()
-        assert "Invalid email or password." in data.get("detail", "")
+        test_email = "wrong_pass_test@example.com"
+        existing = db_session.query(User).filter(User.email == test_email).first()
+        if existing:
+            db_session.delete(existing)
+            db_session.commit()
+
+        user = User(
+            email=test_email,
+            full_name="Password Test",
+            hashed_password=get_password_hash("CorrectPassword123!"),
+            is_active=True,
+            is_verified=True,
+        )
+        db_session.add(user)
+        db_session.commit()
+
+        try:
+            res = client.post("/api/auth/login", json={
+                "email": test_email,
+                "password": "WrongPassword999!"
+            })
+            assert res.status_code == 401
+            data = res.json()
+            assert "Invalid email or password. Please try again." in data.get("detail", "")
+        finally:
+            u = db_session.query(User).filter(User.email == test_email).first()
+            if u:
+                db_session.delete(u)
+                db_session.commit()
 
     def test_register_and_login_lifecycle(self, client, db_session):
         """Register a test user, log in, verify tokens, test casing, and clean up."""
@@ -149,6 +171,52 @@ class TestAuthenticationEndpoints:
         if user:
             db_session.delete(user)
             db_session.commit()
+
+    def test_login_validation_empty_and_malformed(self, client):
+        """Empty fields and invalid emails must fail validation (422)."""
+        # Empty email
+        res1 = client.post("/api/auth/login", json={"email": "", "password": "Password123!"})
+        assert res1.status_code == 422
+
+        # Malformed email
+        res2 = client.post("/api/auth/login", json={"email": "not-an-email", "password": "Password123!"})
+        assert res2.status_code == 422
+
+        # Missing password
+        res3 = client.post("/api/auth/login", json={"email": "valid@example.com"})
+        assert res3.status_code == 422
+
+    def test_login_with_whitespace_email(self, client, db_session):
+        """Email with leading/trailing spaces must be trimmed and authenticate if user exists."""
+        test_email = "whitespace_user@example.com"
+        existing = db_session.query(User).filter(User.email == test_email).first()
+        if existing:
+            db_session.delete(existing)
+            db_session.commit()
+
+        user = User(
+            email=test_email,
+            full_name="Whitespace User",
+            hashed_password=get_password_hash("SecretPassword123!"),
+            is_active=True,
+            is_verified=True,
+        )
+        db_session.add(user)
+        db_session.commit()
+
+        try:
+            # Login with leading and trailing spaces
+            res = client.post("/api/auth/login", json={
+                "email": "   whitespace_user@example.com   ",
+                "password": "SecretPassword123!"
+            })
+            assert res.status_code == 200
+            assert "access_token" in res.json()
+        finally:
+            u = db_session.query(User).filter(User.email == test_email).first()
+            if u:
+                db_session.delete(u)
+                db_session.commit()
 
 
 class TestProductionCORSAndHealth:

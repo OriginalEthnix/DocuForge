@@ -78,11 +78,18 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
     clean_email = payload.email.strip().lower()
     user = db.query(User).filter(User.email.ilike(clean_email)).first()
 
-    if not user or not verify_password(payload.password, user.hashed_password):
+    if not user:
+        logger.info(f"Login attempted for unregistered email: {clean_email}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email. Create an account to get started.",
+        )
+
+    if not verify_password(payload.password, user.hashed_password):
         logger.warning(f"Invalid login attempt for email: {clean_email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
+            detail="Invalid email or password. Please try again.",
         )
 
     if not user.is_active:
