@@ -2,14 +2,24 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { AuthTokens } from '@/types';
 
 // Resolve API base URL:
-// 1. Check VITE_API_URL environment variable.
-// 2. If present, normalize (strip trailing slash and guarantee /api path if appropriate).
+// 1. Check VITE_API_URL or alternative VITE_* backend variables.
+// 2. If present, normalize (strip trailing slash, ensure protocol https://, guarantee /api path).
 // 3. If absent, fall back to '/api' (proxied by Vite dev server to localhost:8000 during local development).
-const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+const rawApiUrl = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_BACKEND_URL ||
+  import.meta.env.VITE_RENDER_URL ||
+  import.meta.env.VITE_SERVER_URL ||
+  ''
+).trim();
 
 export const BASE_URL: string = (() => {
   if (rawApiUrl) {
-    const cleaned = rawApiUrl.replace(/\/+$/, '');
+    let cleaned = rawApiUrl.replace(/\/+$/, '');
+    // Ensure scheme if user entered domain without https://
+    if (!cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+      cleaned = `https://${cleaned}`;
+    }
     return cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
   }
   return '/api';
