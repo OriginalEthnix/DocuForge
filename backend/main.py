@@ -39,6 +39,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,10 +65,12 @@ async def shutdown_event():
     logger.info("👋 Application shutting down...")
 
 
+@app.get("/", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
 async def health_check():
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
+        "docs": "/api/docs",
     }

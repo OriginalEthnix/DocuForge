@@ -1,7 +1,29 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { AuthTokens } from '@/types';
 
-const BASE_URL = '/api';
+// Resolve API base URL:
+// 1. Check VITE_API_URL environment variable.
+// 2. If present, normalize (strip trailing slash and guarantee /api path if appropriate).
+// 3. If absent, fall back to '/api' (proxied by Vite dev server to localhost:8000 during local development).
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+export const BASE_URL: string = (() => {
+  if (rawApiUrl) {
+    const cleaned = rawApiUrl.replace(/\/+$/, '');
+    return cleaned.endsWith('/api') ? cleaned : `${cleaned}/api`;
+  }
+  return '/api';
+})();
+
+if (import.meta.env.PROD && !rawApiUrl && typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  console.warn(
+    '[DocuForge AI] VITE_API_URL is not set in this production build. API requests are falling back to ' +
+    BASE_URL +
+    ' on ' +
+    window.location.origin +
+    ', which requires a backend reverse-proxy or deployed API server.'
+  );
+}
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -92,7 +114,43 @@ export function clearTokens() {
 
 export function getErrorMessage(error: unknown): string {
   if (error instanceof AxiosError) {
-    return error.response?.data?.detail || error.message || 'An unexpected error occurred.';
+    const data = error.response?.data;
+
+    // 1. Backend returned structured detail from FastAPI
+    if (data?.detail) {
+      if (typeof data.detail === 'string') return data.detail;
+      if (Array.isArray(data.detail)) {
+        return data.detail.map((d: any) => d.msg || (typeof d === 'string' ? d : JSON.stringify(d))).join(', ');
+      }
+    }
+    if (data?.message && typeof data.message === 'string') {
+      return data.message;
+    }
+
+    // 2. Detect 404 from static host (e.g. Vercel) when API is missing/unreachable
+    if (error.response?.status === 404) {
+      const isHtmlResponse = typeof data === 'string' && (data.includes('<!DOCTYPE html>') || data.includes('<html'));
+      const isVercelError =
+        error.response?.headers?.['x-vercel-error'] === 'NOT_FOUND' ||
+        (typeof data === 'string' && data.includes('NOT_FOUND'));
+
+      if (isVercelError || isHtmlResponse || !rawApiUrl) {
+        return 'Backend API endpoint not found (HTTP 404). Please ensure your FastAPI backend is running and VITE_API_URL is configured in your Vercel project environment variables.';
+      }
+      return 'The requested API endpoint was not found on the backend (HTTP 404).';
+    }
+
+    // 3. Network connection errors / CORS blocks
+    if (error.code === 'ERR_NETWORK') {
+      return `Cannot connect to backend server (${BASE_URL}). Please verify that the backend is running and CORS allows ${typeof window !== 'undefined' ? window.location.origin : 'this origin'}.`;
+    }
+
+    // 4. HTTP status message fallback
+    if (error.response?.statusText && error.response.statusText !== 'OK') {
+      return `Request failed with status ${error.response.status}: ${error.response.statusText}`;
+    }
+
+    return error.message || 'An unexpected error occurred.';
   }
   if (error instanceof Error) return error.message;
   return 'An unexpected error occurred.';
