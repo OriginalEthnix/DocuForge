@@ -129,6 +129,7 @@ function ProtectedRoute() {
       <div
         className={`sidebar-overlay ${mobileMenuOpen ? 'active' : ''}`}
         onClick={() => setMobileMenuOpen(false)}
+        onTouchEnd={() => setMobileMenuOpen(false)}
         aria-hidden="true"
       />
 

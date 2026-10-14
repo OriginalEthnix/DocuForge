@@ -57,10 +57,8 @@ export function Sidebar({ collapsed = false, mobileOpen = false, onCloseMobile }
   };
 
   return (
-    <motion.aside
+    <aside
       className={`sidebar-container ${mobileOpen ? 'open' : ''}`}
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
       style={{
         width: collapsed ? 64 : 260,
         minWidth: collapsed ? 64 : 260,
@@ -113,10 +111,34 @@ export function Sidebar({ collapsed = false, mobileOpen = false, onCloseMobile }
         {/* Mobile close button */}
         {onCloseMobile && (
           <button
+            type="button"
             className="btn btn-ghost btn-icon hide-on-desktop touch-target"
-            onClick={onCloseMobile}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onCloseMobile();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onCloseMobile();
+            }}
             aria-label="Close navigation menu"
-            style={{ color: 'var(--text-muted)' }}
+            style={{
+              color: 'var(--text-secondary)',
+              background: 'var(--bg-hover)',
+              borderRadius: 'var(--radius-md)',
+              width: 36,
+              height: 36,
+              minWidth: 36,
+              minHeight: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              border: '1px solid var(--border-default)',
+              padding: 0,
+            }}
           >
             <X size={20} />
           </button>
@@ -274,6 +296,6 @@ export function Sidebar({ collapsed = false, mobileOpen = false, onCloseMobile }
           )}
         </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 }
