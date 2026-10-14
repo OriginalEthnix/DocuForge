@@ -154,13 +154,13 @@ export function CreateProjectPage() {
         {STEPS.map((s, i) => (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <div style={{
-              height: 3,
+              height: 4,
               borderRadius: 'var(--radius-full)',
               background: i <= step ? 'var(--gradient-brand)' : 'var(--bg-hover)',
               transition: 'background 0.3s ease',
             }} />
-            <div style={{ fontSize: '0.7rem', color: i === step ? 'var(--color-brand-400)' : 'var(--text-muted)', fontWeight: i === step ? 600 : 400 }}>
-              Step {i + 1}: {s.title}
+            <div style={{ fontSize: '0.72rem', color: i === step ? 'var(--color-brand-400)' : 'var(--text-muted)', fontWeight: i === step ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span className="hide-on-mobile">Step {i + 1}: </span>{s.title}
             </div>
           </div>
         ))}
@@ -223,7 +223,7 @@ export function CreateProjectPage() {
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Domain & Target Users</h2>
 
                 <FormGroup label="Project Domain *" error={errors.domain?.message}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 110px), 1fr))', gap: '0.5rem' }}>
                     {DOMAINS.map(d => (
                       <label
                         key={d.value}
@@ -269,7 +269,7 @@ export function CreateProjectPage() {
               <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Technology & Team</h2>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
                   <FormGroup label="Team Size *" error={errors.team_size?.message}>
                     <input type="number" className="input-field" min={1} max={1000} {...register('team_size')} />
                   </FormGroup>

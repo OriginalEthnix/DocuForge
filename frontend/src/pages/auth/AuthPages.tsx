@@ -74,7 +74,7 @@ export function LoginPage() {
         </div>
 
         {/* Form */}
-        <div className="card" style={{ padding: '2rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {apiError && (
               <motion.div
@@ -215,7 +215,7 @@ export function RegisterPage() {
           </p>
         </div>
 
-        <div className="card" style={{ padding: '2rem' }}>
+        <div className="card" style={{ padding: 'clamp(1.25rem, 4vw, 2rem)' }}>
           <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {apiError && (
               <div style={{
@@ -230,7 +230,7 @@ export function RegisterPage() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: '1rem' }}>
               <FormField label="Full Name" error={errors.full_name?.message}>
                 <InputWithIcon icon={<User size={16} />}>
                   <input type="text" placeholder="John Doe" className="input-field" style={{ paddingLeft: '2.5rem' }} {...register('full_name')} />
@@ -294,7 +294,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem',
+      padding: 'clamp(1rem, 4vw, 2rem)',
       background: 'var(--bg-base)',
       position: 'relative',
       overflow: 'hidden',

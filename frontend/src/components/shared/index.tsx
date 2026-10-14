@@ -175,9 +175,10 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '4rem 2rem',
+        padding: '2.5rem 1rem',
         textAlign: 'center',
         gap: '1rem',
+        width: '100%',
       }}
     >
       {icon && (
@@ -249,8 +250,9 @@ export function SectionHeader({ title, subtitle, action, icon }: SectionHeaderPr
       justifyContent: 'space-between',
       marginBottom: '1.5rem',
       gap: '1rem',
+      flexWrap: 'wrap',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: '1 1 240px' }}>
         {icon && (
           <div style={{
             width: 40,
@@ -261,22 +263,38 @@ export function SectionHeader({ title, subtitle, action, icon }: SectionHeaderPr
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--color-brand-400)',
+            flexShrink: 0,
           }}>
             {icon}
           </div>
         )}
-        <div>
-          <h1 style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+        <div style={{ minWidth: 0 }}>
+          <h1 style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.02em', wordBreak: 'break-word' }}>
             {title}
           </h1>
           {subtitle && (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: 2 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: 2, wordBreak: 'break-word' }}>
               {subtitle}
             </p>
           )}
         </div>
       </div>
-      {action && <div>{action}</div>}
+      {action && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', maxWidth: '100%' }}>
+          {action}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Responsive Table Wrapper ─────────────────────────────────────────────────
+export function ResponsiveTable({ children, minWidth = 600 }: { children: React.ReactNode; minWidth?: number }) {
+  return (
+    <div className="table-responsive">
+      <div style={{ minWidth }}>
+        {children}
+      </div>
     </div>
   );
 }

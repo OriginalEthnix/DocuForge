@@ -91,6 +91,7 @@ export function UserStoriesPage() {
                 background: 'rgba(99,102,241,0.08)',
                 border: '1px solid var(--border-brand)',
                 borderRadius: 'var(--radius-md)',
+                flexWrap: 'wrap',
               }}>
                 <Target size={16} style={{ color: 'var(--color-brand-400)' }} />
                 <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-brand-400)' }}>{groupName}</span>
@@ -99,7 +100,7 @@ export function UserStoriesPage() {
                 </span>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '0.75rem' }}>
                 {groupStories.map((story: any, i: number) => (
                   <StoryCard key={i} story={story} index={i} />
                 ))}

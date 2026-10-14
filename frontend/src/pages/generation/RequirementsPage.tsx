@@ -63,7 +63,7 @@ export function RequirementsPage() {
             { label: 'Business', count: data.business?.length || 0, color: '#4ade80', icon: AlertCircle },
             { label: 'Total', count: totalCount, color: '#c084fc', icon: FileText },
           ].map(stat => (
-            <div key={stat.label} className="card" style={{ flex: '1 1 140px', padding: '1rem', textAlign: 'center' }}>
+            <div key={stat.label} className="card" style={{ flex: '1 1 min(100%, 130px)', padding: '0.875rem', textAlign: 'center' }}>
               <stat.icon size={20} style={{ color: stat.color, marginBottom: '0.375rem' }} />
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: stat.color }}>{stat.count}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{stat.label}</div>
@@ -115,7 +115,7 @@ export function RequirementsPage() {
           )}
 
           {/* Stakeholders + Assumptions */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem' }}>
             {data.stakeholders?.length > 0 && (
               <InfoSection title="Stakeholders" items={data.stakeholders} color="#f472b6" />
             )}

@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
+import { Menu, Zap } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { Sidebar } from '@/components/shared/Sidebar';
 
@@ -32,7 +33,13 @@ const queryClient = new QueryClient({
 
 // ─── Protected Route ──────────────────────────────────────────────────────────
 function ProtectedRoute() {
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { user, isAuthenticated, isLoading } = useAuthStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   if (isLoading) {
     return (
@@ -66,9 +73,66 @@ function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
+  const initials = user?.full_name
+    ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
   return (
     <div className="app-layout">
-      <Sidebar />
+      {/* Mobile Top Header */}
+      <header className="mobile-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            className="btn btn-ghost btn-icon touch-target"
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            aria-label="Toggle navigation menu"
+            style={{ padding: '0.5rem', color: 'var(--text-primary)' }}
+          >
+            <Menu size={22} />
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{
+              width: 28,
+              height: 28,
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--gradient-brand)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'var(--shadow-brand)',
+            }}>
+              <Zap size={16} color="white" />
+            </div>
+            <span style={{ fontWeight: 700, fontSize: '0.925rem', letterSpacing: '-0.02em' }}>
+              DocuForge AI
+            </span>
+          </div>
+        </div>
+
+        <div style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          background: 'var(--gradient-brand)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          color: 'white',
+        }}>
+          {initials}
+        </div>
+      </header>
+
+      {/* Backdrop overlay for mobile drawer */}
+      <div
+        className={`sidebar-overlay ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      <Sidebar mobileOpen={mobileMenuOpen} onCloseMobile={() => setMobileMenuOpen(false)} />
       <div className="main-content scroll-area">
         <Outlet />
       </div>

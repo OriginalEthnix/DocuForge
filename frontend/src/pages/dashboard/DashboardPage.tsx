@@ -162,7 +162,7 @@ export function DashboardPage() {
       {/* Stat Cards */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
         gap: '1rem',
         marginBottom: '1.5rem',
       }}>
@@ -213,14 +213,14 @@ export function DashboardPage() {
       </div>
 
       {/* Main Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div className="dashboard-main-grid">
         {/* Recent Projects */}
         <motion.div
           className="card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          style={{ gridColumn: 'span 2', padding: '1.5rem' }}
+          style={{ padding: 'clamp(1rem, 3vw, 1.5rem)' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
             <h2 style={{ fontSize: '1rem', fontWeight: 600 }}>Recent Projects</h2>
@@ -256,7 +256,7 @@ export function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          style={{ padding: '1.5rem' }}
+          style={{ padding: 'clamp(1rem, 3vw, 1.5rem)' }}
         >
           <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1.25rem' }}>Project Status</h2>
           {stats?.total_projects === 0 ? (
@@ -326,7 +326,7 @@ export function DashboardPage() {
             background: 'var(--gradient-brand-soft)',
             border: '1px solid var(--border-brand)',
             borderRadius: 'var(--radius-xl)',
-            padding: '2.5rem',
+            padding: 'clamp(1.5rem, 4vw, 2.5rem)',
             textAlign: 'center',
             marginTop: '1rem',
           }}
@@ -356,16 +356,17 @@ function ProjectRow({ project, onClick }: { project: Project; onClick: () => voi
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '1rem',
+        gap: '0.75rem',
         padding: '0.75rem',
         borderRadius: 'var(--radius-md)',
         cursor: 'pointer',
         transition: 'all var(--transition-fast)',
         border: '1px solid transparent',
+        flexWrap: 'wrap',
       }}
     >
-      <ProgressRing percentage={project.completion_percentage} size={40} strokeWidth={4} />
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <ProgressRing percentage={project.completion_percentage} size={38} strokeWidth={4} />
+      <div style={{ flex: '1 1 180px', minWidth: 0 }}>
         <div style={{ fontWeight: 600, fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {project.title}
         </div>
@@ -373,9 +374,9 @@ function ProjectRow({ project, onClick }: { project: Project; onClick: () => voi
           {modulesCount}/13 modules • {project.domain}
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, marginLeft: 'auto' }}>
         <StatusBadge status={project.status} />
-        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+        <span className="hide-on-mobile" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
           {project.updated_at || project.created_at
             ? formatDistanceToNow(new Date(project.updated_at || project.created_at), { addSuffix: true })
             : ''}

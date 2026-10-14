@@ -97,7 +97,7 @@ export function ProjectsPage() {
 
       {/* Grid */}
       {isLoading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}>
           {[1,2,3,4,5,6].map(i => <CardSkeleton key={i} />)}
         </div>
       ) : filtered.length === 0 ? (
@@ -116,7 +116,7 @@ export function ProjectsPage() {
       ) : (
         <motion.div
           layout
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '1rem' }}
         >
           <AnimatePresence>
             {filtered.map((project, i) => (
@@ -180,21 +180,24 @@ function ProjectCard({
         opacity: 0.8,
       }} />
 
-      {/* Delete button */}
-      <AnimatePresence>
-        {showDelete && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="btn btn-danger btn-icon"
-            style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', zIndex: 10 }}
-            onClick={e => { e.stopPropagation(); onDelete(); }}
-          >
-            <Trash2 size={13} />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {/* Delete button (accessible on touch via always visible or hover) */}
+      <button
+        className="btn btn-ghost btn-icon touch-target"
+        style={{
+          position: 'absolute',
+          top: '0.625rem',
+          right: '0.625rem',
+          zIndex: 10,
+          color: 'var(--text-muted)',
+          opacity: showDelete ? 1 : 0.6,
+          transition: 'all var(--transition-fast)',
+        }}
+        onClick={e => { e.stopPropagation(); onDelete(); }}
+        title="Delete project"
+        aria-label={`Delete ${project.title}`}
+      >
+        <Trash2 size={15} />
+      </button>
 
       <div style={{ marginTop: '0.5rem' }}>
         {/* Status + Domain */}
@@ -247,7 +250,7 @@ function ProjectCard({
         </div>
 
         {/* Meta */}
-        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <Users size={13} /> {project.team_size}
           </span>

@@ -5,7 +5,7 @@ import {
   LayoutDashboard, FolderOpen, Plus, Zap, LogOut, Settings,
   ChevronRight, FileText, GitBranch, Database, BarChart3,
   Shield, TestTube, Network, Activity, Clock, Wrench,
-  Layers, Link2, TrendingUp, BookOpen, Code2, Map,
+  Layers, Link2, TrendingUp, BookOpen, Code2, Map, X,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -32,15 +32,18 @@ const projectModules = [
 
 interface SidebarProps {
   collapsed?: boolean;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export function Sidebar({ collapsed = false }: SidebarProps) {
+export function Sidebar({ collapsed = false, mobileOpen = false, onCloseMobile }: SidebarProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const { projectId } = useParams();
   const [showProjectMenu, setShowProjectMenu] = React.useState(!!projectId);
 
   const handleLogout = () => {
+    onCloseMobile?.();
     logout();
     navigate('/login');
   };
@@ -49,8 +52,13 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
     ? user.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'U';
 
+  const handleNavClick = () => {
+    onCloseMobile?.();
+  };
+
   return (
     <motion.aside
+      className={`sidebar-container ${mobileOpen ? 'open' : ''}`}
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       style={{
@@ -68,37 +76,50 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         zIndex: 100,
       }}
     >
-      {/* Logo */}
+      {/* Logo & Mobile Close */}
       <div style={{
         padding: '1.25rem 1rem',
         borderBottom: '1px solid var(--border-default)',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.75rem',
+        justifyContent: 'space-between',
         minHeight: 64,
       }}>
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 'var(--radius-md)',
-          background: 'var(--gradient-brand)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          boxShadow: 'var(--shadow-brand)',
-        }}>
-          <Zap size={20} color="white" />
-        </div>
-        {!collapsed && (
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.02em' }}>
-              DocuForge AI
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
-              SE DOCUMENTATION
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{
+            width: 36,
+            height: 36,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--gradient-brand)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: 'var(--shadow-brand)',
+          }}>
+            <Zap size={20} color="white" />
           </div>
+          {!collapsed && (
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', letterSpacing: '-0.02em' }}>
+                DocuForge AI
+              </div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
+                SE DOCUMENTATION
+              </div>
+            </div>
+          )}
+        </div>
+        {/* Mobile close button */}
+        {onCloseMobile && (
+          <button
+            className="btn btn-ghost btn-icon hide-on-desktop touch-target"
+            onClick={onCloseMobile}
+            aria-label="Close navigation menu"
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <X size={20} />
+          </button>
         )}
       </div>
 
@@ -123,6 +144,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
             <NavLink
               key={to}
               to={to}
+              onClick={handleNavClick}
               className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
               style={{ marginBottom: 2 }}
             >
@@ -141,7 +163,10 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
               color: 'white',
               border: 'none',
             }}
-            onClick={() => navigate('/projects/new')}
+            onClick={() => {
+              handleNavClick();
+              navigate('/projects/new');
+            }}
           >
             <Plus size={18} style={{ flexShrink: 0 }} />
             {!collapsed && <span>New Project</span>}
@@ -174,6 +199,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                 <NavLink
                   key={path}
                   to={`/projects/${projectId}/${path}`}
+                  onClick={handleNavClick}
                   className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
                   style={{ marginBottom: 2 }}
                 >

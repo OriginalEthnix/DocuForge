@@ -156,7 +156,7 @@ export function ProjectDetailPage() {
           background: 'var(--gradient-card)',
           border: '1px solid var(--border-brand)',
           borderRadius: 'var(--radius-xl)',
-          padding: '1.75rem',
+          padding: 'clamp(1.25rem, 3vw, 1.75rem)',
           marginBottom: '1.5rem',
           position: 'relative',
           overflow: 'hidden',
@@ -173,17 +173,18 @@ export function ProjectDetailPage() {
           pointerEvents: 'none',
         }} />
 
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 280px', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
               <StatusBadge status={project.status} />
               <span className="badge badge-brand">{project.domain.toUpperCase()}</span>
             </div>
             <h1 style={{
-              fontSize: '1.75rem',
+              fontSize: 'clamp(1.35rem, 3.5vw, 1.75rem)',
               fontWeight: 800,
               letterSpacing: '-0.03em',
               marginBottom: '0.5rem',
+              wordBreak: 'break-word',
             }}>
               {project.title}
             </h1>
@@ -192,7 +193,7 @@ export function ProjectDetailPage() {
             </p>
 
             {/* Meta row */}
-            <div style={{ display: 'flex', gap: '1.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
               <MetaItem icon={<Users size={14} />} label={`${project.team_size} member${project.team_size !== 1 ? 's' : ''}`} />
               <MetaItem icon={<Clock size={14} />} label={`${project.timeline_weeks} weeks`} />
               {project.tech_stack?.length > 0 && (
@@ -203,7 +204,7 @@ export function ProjectDetailPage() {
           </div>
 
           {/* Progress ring */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.375rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', flexShrink: 0, margin: '0 auto' }}>
             <div style={{ position: 'relative' }}>
               <ProgressRing percentage={project.completion_percentage} size={88} strokeWidth={7} />
               <div style={{
@@ -235,7 +236,7 @@ export function ProjectDetailPage() {
         </h2>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))',
           gap: '0.875rem',
         }}>
           {ALL_MODULES.map((module, i) => {
