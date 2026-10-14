@@ -85,7 +85,40 @@ def create_project(
     db.add(project)
     db.commit()
     db.refresh(project)
+
+    # Persist project metadata and structure to AWS S3
+    _sync_project_to_s3(current_user.id, project)
+
     return ProjectResponse.model_validate(project)
+
+
+def _sync_project_to_s3(user_id: int, project: Project) -> None:
+    try:
+        from app.services.s3_service import sync_project_metadata
+        data = {
+            "id": project.id,
+            "user_id": user_id,
+            "title": project.title,
+            "description": project.description,
+            "problem_statement": project.problem_statement,
+            "objectives": project.objectives,
+            "domain": project.domain,
+            "target_users": project.target_users,
+            "tech_stack": project.tech_stack,
+            "team_size": project.team_size,
+            "timeline_weeks": project.timeline_weeks,
+            "stakeholders": project.stakeholders,
+            "expected_deliverables": project.expected_deliverables,
+            "status": project.status,
+            "completion_percentage": project.completion_percentage,
+            "generated_modules": project.generated_modules,
+            "created_at": project.created_at.isoformat() if project.created_at else None,
+            "updated_at": project.updated_at.isoformat() if project.updated_at else None,
+        }
+        sync_project_metadata(user_id, project.id, data)
+    except Exception as exc:
+        from app.utils.logger import logger
+        logger.warning(f"S3 sync for project {project.id} failed: {exc}")
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
@@ -115,6 +148,10 @@ def update_project(
 
     db.commit()
     db.refresh(project)
+
+    # Sync updated project metadata to S3
+    _sync_project_to_s3(current_user.id, project)
+
     return ProjectResponse.model_validate(project)
 
 
@@ -126,5 +163,16 @@ def delete_project(
 ):
     """Permanently delete a project and all its data."""
     project = _get_project_or_404(project_id, current_user, db)
+    project_id_val = project.id
+    user_id_val = current_user.id
+
     db.delete(project)
     db.commit()
+
+    # Clean up S3 project metadata
+    try:
+        from app.services.s3_service import delete_project_metadata
+        delete_project_metadata(user_id_val, project_id_val)
+    except Exception as exc:
+        from app.utils.logger import logger
+        logger.warning(f"S3 cleanup for deleted project {project_id_val} failed: {exc}")

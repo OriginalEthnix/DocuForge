@@ -85,5 +85,59 @@ def delete_object(key: str) -> None:
     client.delete_object(Bucket=settings.S3_BUCKET_NAME, Key=key)
 
 
+def is_s3_configured() -> bool:
+    """Return True if S3 bucket name is set."""
+    return bool(settings.S3_BUCKET_NAME and settings.S3_BUCKET_NAME.strip())
+
+
+def sync_user_profile(user_id: int, email: str, full_name: str, organization: Optional[str] = None, created_at: Optional[str] = None) -> Optional[str]:
+    """Persist user profile metadata to S3 under users/{user_id}/profile.json."""
+    if not is_s3_configured():
+        logger.debug("S3 sync skipped: S3_BUCKET_NAME not configured.")
+        return None
+    try:
+        key = f"users/{user_id}/profile.json"
+        data = {
+            "user_id": user_id,
+            "email": email,
+            "full_name": full_name,
+            "organization": organization,
+            "created_at": created_at,
+        }
+        upload_json(data, key)
+        logger.info(f"Synced user profile to S3 at {key}")
+        return key
+    except Exception as exc:
+        logger.warning(f"Failed to sync user profile to S3 for user {user_id}: {exc}")
+        return None
+
+
+def sync_project_metadata(user_id: int, project_id: int, project_dict: Dict[str, Any]) -> Optional[str]:
+    """Persist project metadata to S3 under users/{user_id}/projects/{project_id}/project.json."""
+    if not is_s3_configured():
+        logger.debug("S3 sync skipped: S3_BUCKET_NAME not configured.")
+        return None
+    try:
+        key = f"users/{user_id}/projects/{project_id}/project.json"
+        upload_json(project_dict, key)
+        logger.info(f"Synced project metadata to S3 at {key}")
+        return key
+    except Exception as exc:
+        logger.warning(f"Failed to sync project metadata to S3 for project {project_id}: {exc}")
+        return None
+
+
+def delete_project_metadata(user_id: int, project_id: int) -> None:
+    """Delete project metadata file from S3."""
+    if not is_s3_configured():
+        return
+    try:
+        key = f"users/{user_id}/projects/{project_id}/project.json"
+        delete_object(key)
+        logger.info(f"Deleted project metadata from S3 at {key}")
+    except Exception as exc:
+        logger.warning(f"Failed to delete project metadata from S3: {exc}")
+
+
 def is_s3_error(exc: Exception) -> bool:
     return isinstance(exc, (ClientError, BotoCoreError, RuntimeError))

@@ -48,6 +48,19 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
 
     logger.info(f"New user registered: {user.email} (ID: {user.id})")
 
+    # Persist user profile to AWS S3
+    try:
+        from app.services.s3_service import sync_user_profile
+        sync_user_profile(
+            user_id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            organization=user.organization,
+            created_at=user.created_at.isoformat() if user.created_at else None,
+        )
+    except Exception as e:
+        logger.warning(f"S3 user profile sync on registration failed: {e}")
+
     # Issue tokens
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
@@ -80,6 +93,20 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         )
 
     logger.info(f"Successful login for user: {user.email} (ID: {user.id})")
+
+    # Ensure profile is synced to S3
+    try:
+        from app.services.s3_service import sync_user_profile
+        sync_user_profile(
+            user_id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            organization=user.organization,
+            created_at=user.created_at.isoformat() if user.created_at else None,
+        )
+    except Exception as e:
+        logger.warning(f"S3 user profile sync on login failed: {e}")
+
     access_token = create_access_token({"sub": str(user.id)})
     refresh_token = create_refresh_token({"sub": str(user.id)})
 

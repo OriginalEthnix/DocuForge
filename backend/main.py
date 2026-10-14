@@ -68,9 +68,12 @@ async def shutdown_event():
 @app.get("/", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
 async def health_check():
+    from app.services.s3_service import is_s3_configured
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
         "version": settings.APP_VERSION,
+        "s3_configured": is_s3_configured(),
+        "s3_bucket": settings.S3_BUCKET_NAME or "Not configured",
         "docs": "/api/docs",
     }
